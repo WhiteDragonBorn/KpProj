@@ -6,6 +6,7 @@
 #include <iomanip>
 
 using TInfo = int*;
+using TCompareInt = std::function<bool(int, int)>;
 
 TInfo memory_alloc(const int size);
 void free_memory(int*& arr);
@@ -18,17 +19,25 @@ void reverse_arr(int* arr, const int left, const int right);
 void shift_to_left(int* arr, const int size, const int pos);
 void remove_from_pos(int* arr, int& size, const int pos);
 void cyclic_shift_to_left(int* arr, const int size);
+void shift_to_right(int* arr, const int left, const int right);
+void expand_arr_to_right(int*& arr, int& size, int amount);
+void insert_at_pos(int* &arr, int& size, const int pos, const int elem);
+void cyclic_shift_to_right(int* arr, const int left, const int right);
+void remove_odd(int*& arr, int& size);
+void compress_odd(int* arr, const int size);
+void filter_even(int* arr, const int size);
+void sort_exchange(int* arr, const int size, TCompareInt compare);
 
 TInfo* memory_alloc_and_fill(const int size, const int A, const int B);
 void free_memory(TInfo*& arr, int size);
 
 
-
+// Задача о одномерном массиве используя указатели
 // Returns a pointer to array of pointers (size) of single int in [A, B)
 TInfo* memory_alloc_and_fill(const int size, const int A, const int B)
 {
 	TInfo* arr = new TInfo[size];
-	for (int i = 0; i < size; i++)
+	for (int i = 0; i < size; ++i)
 	{
 		//arr[i] = new int(A + rand()%(B-A));
 		arr[i] = new int;
@@ -39,7 +48,7 @@ TInfo* memory_alloc_and_fill(const int size, const int A, const int B)
 // Destructor for memory_alloc_and_fil(...)
 void free_memory(TInfo*& arr, int size)
 {
-	for (int i = 0; i < size; i++)
+	for (int i = 0; i < size; ++i)
 	{
 		delete arr[i];
 	}
@@ -56,7 +65,7 @@ int pos_first_odd(const TInfo* arr, const int size)
 		if (*arr[i] % 2)
 			pos = i;
 		else
-			i++;
+			++i;
 
 	}
 	return pos;
@@ -88,13 +97,16 @@ TInfo* ptr_first_odd_noi(TInfo* arr, const int size)
 			++p;
 	return ptr;
 }
+//
 
+
+// Операции со статичнскими матрицами
 const int max_row = 5;
 const int max_col = 4;
 
 void print(int matrix[][max_col], const int row, const int col, std::ostream& stream = std::cout)
 {
-	for (int i = 0; i < row; i++)
+	for (int i = 0; i < row; ++i)
 	{
 		for (int j = 0; j < col; j++)
 		{
@@ -108,12 +120,12 @@ void print(int matrix[][max_col], const int row, const int col, std::ostream& st
 int summa(int matrix[][max_col], const int row, const int col)
 {
 	int sum = 0;
-	/*for (int* i = matrix[0] ; i < matrix[0]+row*col; i++)
+	/*for (int* i = matrix[0] ; i < matrix[0]+row*col; ++i)
 	{
 		sum += *i;
 	}*/
 
-	for (int* i = &matrix[0][0] ; i < &matrix[0][0] + row * col; i++)
+	for (int* i = &matrix[0][0] ; i < &matrix[0][0] + row * col; ++i)
 	{
 		sum += *i;
 	}
@@ -123,7 +135,7 @@ int summa(int matrix[][max_col], const int row, const int col)
 int summa_row(int* arr, const int col)
 {
 	int sum = 0;
-	for (int i = 0; i < col; i++)
+	for (int i = 0; i < col; ++i)
 	{
 		sum += arr[i];
 	}
@@ -133,7 +145,7 @@ int summa_row(int* arr, const int col)
 int count_rows_sum_odd(int matrix[][max_col], const int row, const int col)
 {
 	int cnt = 0;
-	for (int i = 0; i < row; i++)
+	for (int i = 0; i < row; ++i)
 	{
 		if (summa_row(matrix[i], col) % 2)
 			cnt++;
@@ -164,6 +176,9 @@ bool is_all_col_order(int matrix[][max_col], const int row, const int col)
 			result = false;
 	return result;
 }
+// 
+
+
 
 int main()
 {
@@ -172,7 +187,7 @@ int main()
 	TInfo arr = memory_alloc(size);
 	fill_arr(arr, size, 10, 20);
 	print_arr(arr, arr + size);
-	std::cout << std::endl;
+	std::cout << std::setw(2) << std::endl;
 	//print_arr(arr, size);
 	
 	/*int even_pair = count_even_pair(arr, size);
@@ -197,8 +212,18 @@ int main()
 	cyclic_shift_to_left(arr, size);
 	print_arr(arr, arr + size);
 
+	std::cout << std::endl;
 
+	remove_odd(arr, size);
+	//compress_odd(arr, size);
+	print_arr(arr, arr + size);
 
+	int pos_to_insert = size - 1;
+	int some_elem = 123;
+	insert_at_pos(arr, size, pos_to_insert, some_elem); // insert between arr[size-2] and arr[size-1]
+	insert_at_pos(arr, size, -1, some_elem); // push_back
+	std::cout << std::endl;
+	print_arr(arr, arr + size);
 
 
 
@@ -315,4 +340,120 @@ void cyclic_shift_to_left(int* arr, const int size)
 	int tmp = arr[0];
 	shift_to_left(arr, size, 0);
 	arr[size - 1] = tmp;
+}
+
+void shift_to_right(int* arr, const int left, const int right)
+{
+	for (int i = right; i > left; --i)
+	{
+		arr[i] = arr[i - 1];
+	}
+}
+
+void expand_arr_to_right(int*& arr, int &size, int amount)
+{
+	int new_size = size + amount;
+	int* tmp = memory_alloc(new_size);
+	for (int i = 0; i < size; ++i)
+	{
+		tmp[i] = arr[i];
+	}
+	for (int j = size; j < new_size; ++j)
+	{
+		tmp[j] = 0;
+	}
+	delete[] arr;
+	arr = tmp;
+	size = new_size;
+	tmp = nullptr;
+}
+
+// Insert certain elem in pos index ( to "push_back" do pos = -1 )
+void insert_at_pos(int* &arr, int& size, const int pos, const int elem)
+{
+	if (pos == -1)
+	{
+		expand_arr_to_right(arr, size, 1);
+		arr[size-1] = elem;
+	}
+	else if (pos >= 0)
+	{
+		expand_arr_to_right(arr, size, 1);
+		shift_to_right(arr, pos, size - 1);
+		arr[pos] = elem;
+	}
+}
+
+void cyclic_shift_to_right(int* arr, const int left, const int right)
+{
+	int tmp = arr[right];
+	shift_to_right(arr, left, right);
+	arr[left] = tmp;
+}
+
+// Creates new array of only even numbers ( new array will be in arr )
+void remove_odd(int*& arr, int& size)
+{
+	int cnt = 0;
+	for (int i = 0; i < size; ++i)
+	{
+		if (arr[i] % 2 == 0)
+		{
+			arr[cnt++] = arr[i];
+		}
+	}
+	int* tmp = memory_alloc(cnt);
+	for (int i = 0; i < cnt; ++i)
+	{
+		tmp[i] = arr[i];
+	}
+	delete[] arr;
+	arr = tmp;
+	size = cnt;
+	tmp = nullptr;
+}
+
+// Finds even numbers, puts them first, then all not-even number will be zeros
+void compress_odd(int* arr, const int size)
+{
+	int cnt = 0;
+	for (int i = 0; i < size; ++i)
+	{
+		if (arr[i] % 2 == 0)
+		{
+			arr[cnt++] = arr[i];
+		}
+	}
+	for (int i = cnt; i < size; ++i)
+	{
+		arr[i] = 0;
+	}
+}
+
+// Finds even numbers, puts them first
+void filter_even(int* arr, const int size)
+{
+	int cnt = 0;
+	for (size_t i = 0; i < size; i++)
+	{
+		if (arr[i] % 2 == 0)
+		{
+			if (cnt != i) cyclic_shift_to_right(arr, cnt, i);
+			++cnt;
+		}
+	}
+}
+
+void sort_exchange(int* arr, const int size, TCompareInt compare)
+{
+	for (size_t count = size; count >= 2; count--)
+	{
+		for (size_t i = 0; i < count - 1; i++)
+		{
+			if (compare(arr[i], arr[i + 1]))
+			{
+				std::swap(arr[i], arr[i + 1]);
+			}
+		}
+	}
 }
