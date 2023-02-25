@@ -26,7 +26,10 @@ void cyclic_shift_to_right(int* arr, const int left, const int right);
 void remove_odd(int*& arr, int& size);
 void compress_odd(int* arr, const int size);
 void filter_even(int* arr, const int size);
-void sort_exchange(int* arr, const int size, TCompareInt compare);
+void sort_bubble_fromback(int* arr, const int size, TCompareInt compare);
+void sort_bubble_fromfront(int* arr, const int size, TCompareInt compare);
+void selection_sort(int* arr, const int size, TCompareInt compare);
+void insert_sort(int* arr, const int size, TCompareInt compare);
 
 TInfo* memory_alloc_and_fill(const int size, const int A, const int B);
 void free_memory(TInfo*& arr, int size);
@@ -185,7 +188,7 @@ int main()
 	srand(time(NULL));
 	int size = 10;
 	TInfo arr = memory_alloc(size);
-	fill_arr(arr, size, 10, 20);
+	fill_arr(arr, size, 0, 10);
 	print_arr(arr, arr + size);
 	std::cout << std::setw(2) << std::endl;
 	//print_arr(arr, size);
@@ -225,9 +228,21 @@ int main()
 	std::cout << std::endl;
 	print_arr(arr, arr + size);
 
-
-
-
+	sort_bubble_fromfront(arr, size, [](int x, int y) { return x > y; });
+	std::cout << std::endl;
+	print_arr(arr, arr + size);
+	sort_bubble_fromback(arr, size, [](int x, int y) { return x < y; });
+	std::cout << std::endl;
+	print_arr(arr, arr + size);
+	reverse_arr(arr, 0, size - 1);
+	std::cout << std::endl;
+	print_arr(arr, arr + size);
+	selection_sort(arr, size, [](int x, int y) {return x > y; });
+	std::cout << std::endl;
+	print_arr(arr, arr + size);
+	insert_sort(arr, size, [](int x, int y) {return x > y; });
+	std::cout << std::endl;
+	print_arr(arr, arr + size);
 
 	free_memory(arr);
 	return 0;
@@ -444,16 +459,59 @@ void filter_even(int* arr, const int size)
 	}
 }
 
-void sort_exchange(int* arr, const int size, TCompareInt compare)
+void sort_bubble_fromback(int* arr, const int size, TCompareInt compare)
 {
-	for (size_t count = size; count >= 2; count--)
+	for (int count = size; count >= 2; --count)
 	{
-		for (size_t i = 0; i < count - 1; i++)
+		for (int i = 0; i < count - 1; ++i)
 		{
 			if (compare(arr[i], arr[i + 1]))
 			{
 				std::swap(arr[i], arr[i + 1]);
 			}
 		}
+	}
+}
+
+void sort_bubble_fromfront(int * arr, const int size, TCompareInt compare)
+{
+	for (int i = 0; i < size - 1; ++i)
+		// Last i elements are already in place
+		for (int j = 0; j < size - i - 1; ++j)
+			if (compare(arr[j], arr[j + 1]))
+				std::swap(arr[j], arr[j + 1]);
+}
+
+void selection_sort(int* arr, const int size, TCompareInt compare)
+{
+	for (int i = 0; i < size - 1; ++i)
+	{
+		int tmp = i;
+		for (int j = i + 1; j < size; ++j)
+		{
+			if (compare(arr[j], arr[tmp]))
+			{
+				tmp = j;
+			}
+		}
+		if (tmp != i)
+		{
+			std::swap(arr[i], arr[tmp]);
+		}
+	}
+}
+
+void insert_sort(int* arr, const int size, TCompareInt compare)
+{
+	for (int i = 1; i < size; ++i)
+	{
+		int key = arr[i];
+		int j = i - 1;
+		while (j >= 0 && compare(arr[j], key))
+		{
+			arr[j + 1] = arr[j];
+			--j;
+		}
+		arr[j + 1] = key;
 	}
 }
