@@ -103,7 +103,7 @@ TInfo* ptr_first_odd_noi(TInfo* arr, const int size)
 //
 
 
-// Операции со статичнскими матрицами
+// Операции со статическими матрицами
 const int max_row = 5;
 const int max_col = 4;
 
@@ -114,8 +114,8 @@ void print(int matrix[][max_col], const int row, const int col, std::ostream& st
 		for (int j = 0; j < col; j++)
 		{
 			stream << std::setw(4) << matrix[i][j];
-			stream << std::setw(4) << *(matrix[i] + j);
-			stream << std::setw(4) << *(*(matrix+i) + j);
+			//stream << std::setw(4) << *(matrix[i] + j);
+			//stream << std::setw(4) << *(*(matrix+i) + j);
 		}
 		stream << std::endl;
 	}
@@ -181,7 +181,76 @@ bool is_all_col_order(int matrix[][max_col], const int row, const int col)
 }
 // 
 
+// Алгоритм сортировки матрицы
+// упорядочить строки по их суммам
+void sorting_matrix(int matrix[][max_col], const int row, const int col)
+{
+	int* sum = new int[row];
+	for (int i = 0; i < row; ++i)
+	{
+		sum[i] = summa_row(matrix[i], col);
+	}
 
+	for (int count = row ; count >=2; --count)
+	{
+		for (int i = 0; i < count - 1; ++i)
+		{
+			if (sum[i] < sum[i + 1])
+			{
+				std::swap(sum[i], sum[i+1]);
+				std::swap(matrix[i], matrix[i + 1]);
+			}
+		}
+	}
+
+	delete[]sum;
+	sum = nullptr;
+}
+
+//  сортировка через карту индексов
+
+int* sorting_matrix_map(int matrix[][max_col], const int row, const int col)
+{
+	int* sum = new int[row];
+	int* map = new int[row];
+
+	for (int i = 0; i < row; ++i)
+	{
+		sum[i] = summa_row(matrix[i], col);
+		map[i] = i;
+	}
+
+	for (int count = row; count >= 2; --count)
+	{
+		for (int i = 0; i < count - 1; ++i)
+		{
+			if (sum[i] < sum[i + 1])
+			{
+				std::swap(sum[i], sum[i + 1]);
+				std::swap(map[i], map[i + 1]);
+			}
+		}
+	}
+	delete[]sum;
+	sum = nullptr;
+
+	return map;
+}
+
+
+
+void print_matrix_map(int matrix[][max_col], const int row, const int col, int* map, char* message, std::ostream& stream = std::cout)
+{
+	stream << message << "\n";
+	for (int i = 0; i < row; ++i)
+	{
+		for (int j = 0; j < col; ++j)
+		{
+			stream << matrix[map[i]][j] << " ";
+		}
+		stream << "\n";
+	}
+}
 
 int main()
 {
@@ -245,6 +314,14 @@ int main()
 	print_arr(arr, arr + size);
 
 	free_memory(arr);
+
+	int matrix[max_row][max_col]{ {1,1,1,1}, {2,2,2,2}, {3,3,3,3}, {4,4,4,4} , {5,5,5,5} };
+	int* map = sorting_matrix_map(matrix, max_row, max_col);
+	//print_matrix_map(matrix, max_row, max_col, map, "zb");
+
+
+
+
 	return 0;
 }
 
