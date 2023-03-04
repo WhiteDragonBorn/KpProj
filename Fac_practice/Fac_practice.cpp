@@ -237,9 +237,7 @@ int* sorting_matrix_map(int matrix[][max_col], const int row, const int col)
 	return map;
 }
 
-
-
-void print_matrix_map(int matrix[][max_col], const int row, const int col, int* map, char* message, std::ostream& stream = std::cout)
+void print_matrix_map(int matrix[][max_col], const int row, const int col, int* map, const char* message, std::ostream& stream = std::cout)
 {
 	stream << message << "\n";
 	for (int i = 0; i < row; ++i)
@@ -251,6 +249,92 @@ void print_matrix_map(int matrix[][max_col], const int row, const int col, int* 
 		stream << "\n";
 	}
 }
+
+// динамические
+int** memory_allocation(const int row, const int col)
+{
+	int** matr = new int* [row];
+	for (int i = 0; i < row; ++i)
+	{
+		matr[i] = new int[col];
+	}
+}
+
+void free_memoryy(int**& matrix, const int row)
+{
+	for (int i = 0; i < row; i++)
+	{
+		delete[]matrix[i];
+		matrix[i] = nullptr;
+	}
+	delete[]matrix;
+	matrix = nullptr;
+
+}
+
+int** sorting_matrix_ptr(int** matrix, const int row, const int col)
+{
+	int* sum = new int[row];
+	int** ptrs = new int* [row];
+	for (int i = 0; i < row; i++)
+	{
+		sum[i] = summa_row(matrix[i], col);
+		ptrs[i] = matrix[i];
+	}
+
+	for (int count = row; count >= 2; --count)
+	{
+		for (int i = 0; i < count - 1; ++i)
+		{
+			if (sum[i] < sum[i + 1])
+			{
+				std::swap(sum[i], sum[i + 1]);
+				std::swap(ptrs[i], ptrs[i + 1]);
+			}
+		}
+	}
+
+	delete[]sum;
+	sum = nullptr;
+	return ptrs;
+}
+
+void print_dmatrix(int **matrix, const int row, const int col, const char* message, std::ostream& stream = std::cout)
+{
+	stream << message << "\n";
+	for (int i = 0; i < row; ++i)
+	{
+		for (int j = 0; j < col; ++j)
+		{
+			stream << matrix[i][j] << " ";
+		}
+		stream << "\n";
+	}
+}
+
+void fill_matrix_main_diagonal(int** matrix, const int size)
+{
+	int k = 1;
+	for (int h = 1 - size; h < 0; ++h)
+	{
+		for (int i = 0; i <= size + h; i++)
+		{
+			matrix[i][i - h] = k;
+		}
+		++k;
+	}
+
+	for (int h = 0; h < size; ++h)
+	{
+		for (int i = h; i < size; ++i)
+		{
+			matrix[i][i - h] = k;
+		}
+		++k;
+	}
+}
+
+
 
 int main()
 {
@@ -318,6 +402,16 @@ int main()
 	int matrix[max_row][max_col]{ {1,1,1,1}, {2,2,2,2}, {3,3,3,3}, {4,4,4,4} , {5,5,5,5} };
 	int* map = sorting_matrix_map(matrix, max_row, max_col);
 	//print_matrix_map(matrix, max_row, max_col, map, "zb");
+
+	int** matr = memory_allocation(7, 8);
+	int** ptrs = sorting_matrix_ptr(matr, 7, 8);
+	print_dmatrix(ptrs, 7, 8, "aboba");
+
+	if (matr)
+	{
+		free_memoryy(matr, 7);
+	}
+	delete[]ptrs;
 
 
 
